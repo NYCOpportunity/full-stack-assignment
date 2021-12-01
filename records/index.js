@@ -513,8 +513,51 @@ app.use(function(req, res, next) {
 
 app.get('/records', function (req, res) {
   var response;
+  
+  //Your response goes here...
 
-//Your response goes here...
+  // Get query params from url. 
+  // Using "let" because variable need to be mutable in case of the incorrect requet parameters. 
+  let {limit, offset, color} = req.query;
+
+
+  // Parsing a string argument from url and extract an integer. 
+  // If argument appear not to containt an integer replace it with basecase parameter.
+  // If value of the argument is decimal, parseInt will use only natural number and ignore decimals.
+  limit = parseInt(limit) || 100;
+  offset = parseInt(offset) || 0;
+
+  console.log(color)
+
+  // "color" url argument validation. If it's undefine or not an array, response with code 400.
+  if (color !== "undefined" && !Array.isArray(color)) {
+    res.status(400).send('Bad Request');
+    return;
+  }
+
+  // Checking if "offset" and "limit" parameters are positive numbers. 
+  // If that is not the case response with code 400.
+  if (isNaN(limit) || limit < 0 || isNaN(offset) || offset < 0) {
+    res.status(400).send('Bad Request');
+    return;
+  }
+
+  // Checking if "color" url argument is an array
+  if (color && color.length > 0) {
+    response = []
+    // Filtering items with matching colors
+    for (let i = 0; i < data.length; i++) {
+      if (color.indexOf(data[i].color) !== -1){
+        response.push(data[i])
+      }
+    }
+    // Slicing filtered results based on limit and offset arguments values
+    response = response.slice(offset, offset + limit)
+  } 
+  // if there are no color arguments in the url, slicing base array based on limit and offset arguments values
+  else {
+    response = data.slice(offset, offset + limit);
+  }
 
   res.send(response);
 });
